@@ -1,0 +1,35 @@
+package javaSockets;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Date;
+import java.util.Scanner;
+
+// client application which connects to host but must specify ip address
+
+public class client {
+
+	public static void main(String[] args) throws UnknownHostException, IOException {
+		// TODO Auto-generated method stub
+		 
+		 Socket soc = new Socket("192.168.198.1",59090); // is your running both in same host specify same ip address and the port which you selected for client
+		 OutputStream out = soc.getOutputStream();
+		 InputStream in = soc.getInputStream();
+		 int c;
+		 PrintWriter pw = new PrintWriter(out,true);
+		 Scanner sc = new Scanner(in);
+		 String text;
+	System.out.println("enter");     // try to figure out how to send user input from keyborad rajsimha
+			text = "thippeswamy ";
+			pw.println(text);
+			 System.out.println(soc.getLocalPort());
+		
+		
+			 System.out.print(sc.nextLine());
+		
+		
+	
+
+}
+}
