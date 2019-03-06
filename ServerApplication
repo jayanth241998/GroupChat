@@ -1,0 +1,71 @@
+package javaSockets;
+
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+// server setup at port (59090) which accepts clients and dedicates a thread to it , the thread continously listens to the client .
+public class MultiThreadedServer {
+
+	public static void main(String[] args) throws IOException {
+		
+		ServerSocket server = new ServerSocket(59090);
+		ExecutorService exec = Executors.newFixedThreadPool(50);
+		System.out.println("running multithread server ......");
+		
+		while(true)
+		{
+			exec.execute(new CapThreads(server.accept())); // multithread optional
+		}
+		
+
+	}
+
+}
+
+
+// a thread which contains code to listen to its client
+package javaSockets;
+
+import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
+import java.util.Scanner;
+
+
+public class CapThreads implements Runnable{
+Socket soc;
+	CapThreads(Socket a)
+	{
+		this.soc=a;
+	}
+	@Override
+	public void run() {
+	
+		try {
+			InputStream in = soc.getInputStream();
+			OutputStream out = soc.getOutputStream();
+			Scanner sc = new Scanner(in);
+			PrintWriter p = new PrintWriter(out,true);
+			
+			while(sc.hasNext())
+			{
+			String str = sc.nextLine();
+			str = str.toUpperCase();
+			p.println(str + soc.getLocalPort());
+			}
+			
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+	}
+	
+	
+
+}
