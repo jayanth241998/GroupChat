@@ -1,0 +1,100 @@
+package multicast_practice;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
+import java.util.Scanner;
+
+//common socket class
+class Sock {
+static MulticastSocket socket;
+InetAddress group;
+	
+	Sock() throws IOException {
+		socket=new MulticastSocket(4321);
+	    group=InetAddress.getByName("230.0.0.0");
+	    socket.joinGroup(group);
+	}
+}
+
+//class for input thread
+//same logic as server input
+class Input extends Sock implements Runnable {
+	
+	Input() throws IOException {
+		super();
+	}
+	
+	public void run() {
+		System.out.println("Output Thread running");
+		try {
+			String message;
+			Scanner in = new Scanner(System.in);
+			System.out.print("Enter your message");
+			while(true) {
+			message = in.nextLine();
+			sendUDPMessage(message, "230.0.0.0",
+						         4321);	
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	 public void sendUDPMessage(String message,
+			   String ipAddress, int port) throws IOException {
+		 byte[] msg = message.getBytes();
+		 DatagramPacket packet = new DatagramPacket(msg, msg.length,
+		         group, port);
+		 socket.send(packet);
+	 }
+}
+
+//output thread
+class Output extends Sock implements Runnable {
+	
+	Output() throws IOException {
+		super();
+	}
+	
+	public void run() {
+		System.out.println("Output Thread running");
+		try {
+		      receiveUDPMessage("230.0.0.0", 4321);
+		   }catch(IOException ex){
+		      ex.printStackTrace();
+		   }	
+	}
+	
+	 public void receiveUDPMessage(String ip, int port) throws
+     IOException {
+  byte[] buffer=new byte[1024];
+  while(true){
+     System.out.println("Waiting for multicast message...");
+     DatagramPacket packet=new DatagramPacket(buffer,
+        buffer.length);
+     socket.receive(packet);
+     String msg=new String(packet.getData(),
+     packet.getOffset(),packet.getLength());
+     System.out.println("[Multicast UDP message received] "+msg);
+     if("OK".equals(msg)) {
+        System.out.println("No more message. Exiting : "+msg);
+        break;
+     }
+  }
+  socket.leaveGroup(group);
+  socket.close();
+}
+}
+
+// main class
+public class UDPMulticastClient {
+
+   public static void main(String[] args) throws IOException {
+      Thread out=new Thread(new Output());
+      Thread in = new Thread(new Input());
+      out.start();
+      in.start();
+   }
+}
