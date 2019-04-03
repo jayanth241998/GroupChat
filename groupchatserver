@@ -1,0 +1,47 @@
+package multicast_practice;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+
+public class UDPMulticastServer {
+
+   public static void sendUDPMessage(String message,
+   String ipAddress, int port) throws IOException {
+	  // creating a datagram socket
+      DatagramSocket socket = new DatagramSocket();
+      // inetaddr for multicasting
+      InetAddress group = InetAddress.getByName(ipAddress);
+      byte[] msg = message.getBytes();
+      // creating a datagram packet
+      DatagramPacket packet = new DatagramPacket(msg, msg.length,
+         group, port);
+      //self explanatory
+      socket.send(packet);
+   }
+
+   public static void main(String[] args) throws IOException {
+	   String ipAddress = "230.0.0.0";
+	   DatagramSocket socket = new DatagramSocket();
+	   InetAddress group = InetAddress.getByName(ipAddress);
+	   byte[] buffer=new byte[1024];
+	   while(true){
+	      System.out.println("Waiting for multicast message...");
+	      DatagramPacket packet=new DatagramPacket(buffer,
+	         buffer.length);
+	      socket.receive(packet);
+	      String msg=new String(packet.getData(),
+	      packet.getOffset(),packet.getLength());
+	      sendUDPMessage(msg, ipAddress,
+	    		  4321);
+//	      System.out.println("[Multicast UDP message received] "+msg);
+	      if("OK".equals(msg)) {
+//	         System.out.println("No more message. Exiting : "+msg);
+	         break;
+	      }
+	   }
+	   // closing the socket
+	   socket.close();
+   }
+}
